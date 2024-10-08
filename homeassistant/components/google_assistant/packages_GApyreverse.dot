@@ -1,0 +1,42 @@
+digraph "packages_GApyreverse" {
+rankdir=BT
+charset="utf-8"
+"homeassistant.components.google_assistant" [color="black", label="homeassistant.components.google_assistant", shape="box", style="solid"];
+"homeassistant.components.google_assistant.button" [color="black", label="homeassistant.components.google_assistant.button", shape="box", style="solid"];
+"homeassistant.components.google_assistant.config_flow" [color="black", label="homeassistant.components.google_assistant.config_flow", shape="box", style="solid"];
+"homeassistant.components.google_assistant.const" [color="black", label="homeassistant.components.google_assistant.const", shape="box", style="solid"];
+"homeassistant.components.google_assistant.data_redaction" [color="black", label="homeassistant.components.google_assistant.data_redaction", shape="box", style="solid"];
+"homeassistant.components.google_assistant.diagnostics" [color="black", label="homeassistant.components.google_assistant.diagnostics", shape="box", style="solid"];
+"homeassistant.components.google_assistant.error" [color="black", label="homeassistant.components.google_assistant.error", shape="box", style="solid"];
+"homeassistant.components.google_assistant.helpers" [color="black", label="homeassistant.components.google_assistant.helpers", shape="box", style="solid"];
+"homeassistant.components.google_assistant.http" [color="black", label="homeassistant.components.google_assistant.http", shape="box", style="solid"];
+"homeassistant.components.google_assistant.logbook" [color="black", label="homeassistant.components.google_assistant.logbook", shape="box", style="solid"];
+"homeassistant.components.google_assistant.report_state" [color="black", label="homeassistant.components.google_assistant.report_state", shape="box", style="solid"];
+"homeassistant.components.google_assistant.smart_home" [color="black", label="homeassistant.components.google_assistant.smart_home", shape="box", style="solid"];
+"homeassistant.components.google_assistant" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant" -> "homeassistant.components.google_assistant.http" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.button" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.button" -> "homeassistant.components.google_assistant.http" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.config_flow" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.diagnostics" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.diagnostics" -> "homeassistant.components.google_assistant.http" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.diagnostics" -> "homeassistant.components.google_assistant.smart_home" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.error" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.helpers" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.helpers" -> "homeassistant.components.google_assistant.data_redaction" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.helpers" -> "homeassistant.components.google_assistant.error" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.helpers" -> "homeassistant.components.google_assistant.http" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.helpers" -> "homeassistant.components.google_assistant.report_state" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.http" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.http" -> "homeassistant.components.google_assistant.helpers" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.http" -> "homeassistant.components.google_assistant.http" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.http" -> "homeassistant.components.google_assistant.smart_home" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.logbook" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.report_state" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.report_state" -> "homeassistant.components.google_assistant.error" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.report_state" -> "homeassistant.components.google_assistant.helpers" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.smart_home" -> "homeassistant.components.google_assistant.const" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.smart_home" -> "homeassistant.components.google_assistant.data_redaction" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.smart_home" -> "homeassistant.components.google_assistant.error" [arrowhead="open", arrowtail="none"];
+"homeassistant.components.google_assistant.smart_home" -> "homeassistant.components.google_assistant.helpers" [arrowhead="open", arrowtail="none"];
+}
