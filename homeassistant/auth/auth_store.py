@@ -334,6 +334,52 @@ class AuthStore:
         # migrate from:
         # 1. Data from a recent version which has a single group without policy
         # 2. Data from old version which has no groups
+
+        groups, has_admin_group, has_user_group, has_read_only_group, group_without_policy = self.create_objects_explicitly(data, groups)
+
+        # If we find a no_policy_group, we need to migrate all users to the
+        # admin group. We only do this if there are no other groups, as is
+        # the expected state. If not expected state, not marking people admin.
+        # This is part of migrating from state 1
+        if groups and group_without_policy is not None:
+            group_without_policy = None
+
+        # This is part of migrating from state 1 and 2
+        if not has_admin_group:
+            admin_group = _system_admin_group()
+            groups[admin_group.id] = admin_group
+
+        # This is part of migrating from state 1 and 2
+        if not has_read_only_group:
+            read_only_group = _system_read_only_group()
+            groups[read_only_group.id] = read_only_group
+
+        if not has_user_group:
+            user_group = _system_user_group()
+            groups[user_group.id] = user_group
+
+        users = self.collect_user_group(data, perm_lookup, users, groups, group_without_policy)
+
+        for cred_dict in data["credentials"]:
+            credential = models.Credentials(
+                id=cred_dict["id"],
+                is_new=False,
+                auth_provider_type=cred_dict["auth_provider_type"],
+                auth_provider_id=cred_dict["auth_provider_id"],
+                data=cred_dict["data"],
+            )
+            credentials[cred_dict["id"]] = credential
+            users[cred_dict["user_id"]].credentials.append(credential)
+
+        users = self.refresh_tokens(data, users, credentials)
+
+        self._groups = groups
+        self._users = users
+        self._build_token_id_to_user_id()
+        self._async_schedule_save(INITIAL_LOAD_SAVE_DELAY)
+
+    def create_object_explicitly(data: dict[str, list[dict[str, Any]]], 
+                                 groups: dict[str, models.Group]) -> {dict[str, models.Group], bool, bool, bool}:
         has_admin_group = False
         has_user_group = False
         has_read_only_group = False
@@ -385,30 +431,16 @@ class AuthStore:
                 system_generated=system_generated,
             )
 
+            return (groups, has_admin_group, has_user_group, has_read_only_group, group_without_policy)
+
+    def collect_user_group(data: dict[str, list[dict[str, Any]]], 
+                           perm_lookup: PermissionLookup, 
+                           users: dict[str, models.User], 
+                           groups: dict[str, models.Group], 
+                           group_without_policy) -> dict[str, models.User]:
         # If there are no groups, add all existing users to the admin group.
         # This is part of migrating from state 2
         migrate_users_to_admin_group = not groups and group_without_policy is None
-
-        # If we find a no_policy_group, we need to migrate all users to the
-        # admin group. We only do this if there are no other groups, as is
-        # the expected state. If not expected state, not marking people admin.
-        # This is part of migrating from state 1
-        if groups and group_without_policy is not None:
-            group_without_policy = None
-
-        # This is part of migrating from state 1 and 2
-        if not has_admin_group:
-            admin_group = _system_admin_group()
-            groups[admin_group.id] = admin_group
-
-        # This is part of migrating from state 1 and 2
-        if not has_read_only_group:
-            read_only_group = _system_read_only_group()
-            groups[read_only_group.id] = read_only_group
-
-        if not has_user_group:
-            user_group = _system_user_group()
-            groups[user_group.id] = user_group
 
         for user_dict in data["users"]:
             # Collect the users group.
@@ -434,18 +466,11 @@ class AuthStore:
                 # New in 2021.11
                 local_only=user_dict.get("local_only", False),
             )
+        return users
 
-        for cred_dict in data["credentials"]:
-            credential = models.Credentials(
-                id=cred_dict["id"],
-                is_new=False,
-                auth_provider_type=cred_dict["auth_provider_type"],
-                auth_provider_id=cred_dict["auth_provider_id"],
-                data=cred_dict["data"],
-            )
-            credentials[cred_dict["id"]] = credential
-            users[cred_dict["user_id"]].credentials.append(credential)
-
+    def refresh_tokens(data: dict[str, list[dict[str, Any]]], 
+                       users: dict[str, models.User], 
+                       credentials: dict[str, models.Credentials]) -> dict[str, models.User]:
         for rt_dict in data["refresh_tokens"]:
             # Filter out the old keys that don't have jwt_key (pre-0.76)
             if "jwt_key" not in rt_dict:
@@ -496,11 +521,7 @@ class AuthStore:
             if "credential_id" in rt_dict:
                 token.credential = credentials.get(rt_dict["credential_id"])
             users[rt_dict["user_id"]].refresh_tokens[token.id] = token
-
-        self._groups = groups
-        self._users = users
-        self._build_token_id_to_user_id()
-        self._async_schedule_save(INITIAL_LOAD_SAVE_DELAY)
+        return users
 
     @callback
     def _build_token_id_to_user_id(self) -> None:
