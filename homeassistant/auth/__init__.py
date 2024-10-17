@@ -493,7 +493,7 @@ class AuthManager:
         ):
             raise ValueError("Client_name is required for long-lived access token")
 
-        self.client_name_valid_long_lived_access_tokens(user, token_type, client_name)
+        self.client_name_valid_long_lived_access_tokens(token_type, client_name)
 
         return await self._store.async_create_refresh_token(
             user,
@@ -507,12 +507,12 @@ class AuthManager:
         )
     
     def client_name_valid_long_lived_access_tokens(
-        user: models.User,
+        self,
         token_type: str | None = None,
         client_name: str | None = None,
     ) -> None:
         if token_type == models.TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN:
-            for token in user.refresh_tokens.values():
+            for token in self._store.async_get_refresh_tokens():
                 if (
                     token.client_name == client_name
                     and token.token_type == models.TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN
